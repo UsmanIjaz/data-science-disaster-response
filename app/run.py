@@ -13,9 +13,18 @@ from plotly.graph_objs import Bar
 from sqlalchemy import create_engine
 import pickle
 
-def load_src(name, fpath):
+def load_src(name, filepath):
+    """
+    Load a python file from another folder
+    --
+    Inputs:
+        name: name of the imported file
+        filepath: python file to be imported
+    Outputs:
+        df: the combined dataframe
+    """
     import os, imp
-    return imp.load_source(name, os.path.join(os.path.dirname(__file__), fpath))
+    return imp.load_source(name, os.path.join(os.path.dirname(__file__), filepath))
 
 load_src("classifier", "../models/train_classifier.py")
 from classifier import TextSelector,ColumnExtractor,DummyTransformer,tokenize

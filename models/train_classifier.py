@@ -74,7 +74,9 @@ class NumberSelector(BaseEstimator, TransformerMixin):
         return self
 
 class ColumnExtractor(BaseEstimator, TransformerMixin):
-
+    """
+    Transformer to select a single column from the data frame to perform additional transformations on
+    """
     def __init__(self, cols):
         self.cols = cols
 
@@ -90,7 +92,10 @@ class ColumnExtractor(BaseEstimator, TransformerMixin):
 from sklearn.feature_extraction import DictVectorizer
 
 class DummyTransformer(BaseEstimator, TransformerMixin):
-
+    """
+    Transformer to select a single categorical column from the dataframe to perform additional transformations on
+    in order to get dummy variables for the categories
+    """
     def __init__(self):
         self.dv = None
 
@@ -114,6 +119,16 @@ class DummyTransformer(BaseEstimator, TransformerMixin):
 
 
 def load_data(database_filepath):
+    """
+    Load the database file into a dataframe
+    --
+    Inputs:
+        database_filepath: database file to be read
+    Outputs:
+        X: Independent Features
+        Y: Dependent Features
+        Y.columns.values : List of the names of Dependent Features
+    """
     # load data from database
     engine = create_engine('sqlite:///'+database_filepath)
     conn = engine.connect()
@@ -129,6 +144,15 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    """
+    Tokenize the input text and return a clean tokens after normalization, lemmatization, and removing stopwords
+    --
+    Inputs:
+        text: a piece of text
+    Outputs:
+        clean_tokens: a clean list of tokens
+    """
+    
     lemmatizer = WordNetLemmatizer()
     pat1 = r'@[A-Za-z0-9_]+'
     pat2 = r'https?://[^ ]+'
@@ -164,6 +188,11 @@ def tokenize(text):
 
 
 def build_model():
+    """
+    Build the machine learning pipeline
+    --
+    Output: machine learning model pipeline
+    """
 
     pipeline = Pipeline([
         ('features',FeatureUnion([
@@ -186,11 +215,30 @@ def build_model():
     return pipeline
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    Print the classification report
+    --
+    Inputs:
+        model : machine learning model
+        X_test : df containing independent Features from the test set
+        X_test : dfcontaing dependent Features from the test set
+        category_names : List of the names of Dependent Features
+    Outputs:
+        Report: precision, recall, F1-score for each category and combined results 
+    """
+    
     y_pred = model.predict(X_test)
     print(classification_report(Y_test, y_pred, target_names=category_names))
 
 
 def save_model(model, model_filepath):
+    """
+    Saves the model into a pickle file 
+    --
+    Inputs:
+        model: trained machine learning model
+        model_filepath: Name of the pickle file to save the model
+    """       
     #joblib.dump(model, model_filepath)
     pickle.dump( model, open( model_filepath, "wb" ) )
 

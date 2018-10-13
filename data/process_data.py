@@ -6,6 +6,15 @@ from langdetect import detect
 
 
 def load_data(messages_filepath, categories_filepath):
+    """
+    Load the csv files and combine them into a data frame
+    --
+    Inputs:
+        messages_filepath: csv file contains messages
+        categories_filepath: csv file contains categories
+    Outputs:
+        df: the combined dataframe
+    """
     # load messages dataset
     messages = pd.read_csv(messages_filepath)
     # load categories dataset
@@ -16,12 +25,28 @@ def load_data(messages_filepath, categories_filepath):
     return df
 
 def lang_detect(txt):
+    """
+    Detect the language of a given text using langdetect library
+    --
+    Inputs:
+        txt: message string
+    Outputs:
+        string: language name string or None if language not detected
+    """
     try:
         return detect(txt)
     except:
         return None
 
 def clean_data(df):
+    """
+    Clean the dataframe. It includes removing duplicates and non-English messages 
+    --
+    Inputs:
+        df: messages and categories combined dataframe dataframe
+    Outputs:
+        df: cleaned dataframe
+    """    
     categories = df.categories.str.split(';',expand=True)
     # select the first row of the categories dataframe
     row = categories.loc[0]
@@ -45,6 +70,7 @@ def clean_data(df):
     df.message[df.original_lang.isin(['en']) & ~df.message_lang.isin(['en'])] = df.original
     df.message_lang[df.original_lang.isin(['en']) & ~df.message_lang.isin(['en'])] = "en"
     df_eng = df[df.message_lang=="en"]
+    df_eng = df[df.message_lang.notnull()]
     df_eng = df_eng.drop(['message_lang','original_lang'], axis=1)
     
     df_eng = pd.concat([df_eng, categories], axis=1)
@@ -54,6 +80,13 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
+    """
+    Saves the dataframe into a sqlite database 
+    --
+    Inputs:
+        df: messages and categories combined dataframe dataframe
+        database_filename: Name of the database file
+    """    
     engine = create_engine('sqlite:///'+database_filename)
     df.to_sql('Messages', engine, if_exists='replace',index=False)  
 
