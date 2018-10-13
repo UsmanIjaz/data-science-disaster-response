@@ -64,7 +64,10 @@ def clean_data(df):
     
     categories.related[categories.related==2] = 0
     df.drop(['categories'], axis=1, inplace=True)
-    
+    df = pd.concat([df, categories], axis=1)
+    # drop duplicates
+    df = df[df.id.duplicated()==False]
+
     df['message_lang'] = df.message.apply(lambda x: lang_detect(x))
     df['original_lang'] = df.original.apply(lambda x: lang_detect(x))
     df.message[df.original_lang.isin(['en']) & ~df.message_lang.isin(['en'])] = df.original
@@ -72,9 +75,6 @@ def clean_data(df):
     df_eng = df[df.message_lang=="en"]
     df_eng = df[df.message_lang.notnull()]
     df_eng = df_eng.drop(['message_lang','original_lang'], axis=1)
-    
-    df_eng = pd.concat([df_eng, categories], axis=1)
-    df_eng = df_eng[df_eng.id.duplicated()==False]
     
     return df_eng
 
